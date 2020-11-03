@@ -1,6 +1,6 @@
 v 3
 d mmat2tex export Mata Matrix to LaTeX Table.
 d Jan Ditzen, Free University of Bozen-Bolzano
-d Distribution-Date:  20201102
+d Distribution-Date:  20201103
 f mmat2tex.ado
 f mmat2tex.sthlp
