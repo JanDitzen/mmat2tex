@@ -308,7 +308,7 @@ end
 **Necessary as STATA is sometimes "too fast" for the operating system.
 capture program drop force_override
 program define force_override
-        syntax anything , cmd(string asis) sleep(real 500)
+        syntax anything , cmd(string asis) [sleep(real 500)]
 
         tokenize `anything'
         local rc `1'
