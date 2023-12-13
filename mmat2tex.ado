@@ -1,10 +1,10 @@
-*!Version 2.1 - 02.11.2020
-*!Created by Jan Ditzen - jd219@hw.ac.uk - jan.ditzen.net
+*!Version 2.2 - 13.12.2023
+*!Created by Jan Ditzen - jan.ditzen@unibz.it - jan.ditzen.net
 *Changelog:
-*		Version 2.0:
-*		10.11.2016 - fmt option changed. now possible to set fmt for each column.
-*		05.10.2016 - coeff option and m_signficance program added
-*		Version 1.0:
+*       Version 2.0:
+*       10.11.2016 - fmt option changed. now possible to set fmt for each column.
+*       05.10.2016 - coeff option and m_signficance program added
+*       Version 1.0:
 *       02.03.2015 - Error in append/replace fixed
 *       28.06.2015 - Fixed error in substitute
 *       05.07.2015 - Added program force_override which pauses the program for 0.5seconds and tries to write file again if error is 603 (file can not be opened).
@@ -12,6 +12,8 @@
 *       20.07.2015 - Fixed error on preheader option.
 *       29.06.2015 - Added version 10
 *       02.11.2020 - added option sleep
+*       Version 2.2
+*       13.12.2022 - added check for filetype and fixed bug when path had empty spaces. Now sets directory.
 
 capture program drop mmat2tex
 program define mmat2tex
@@ -49,26 +51,36 @@ program define mmat2tex
         if "`nocdset'" == "" {
                 tempname mfile mpath
                 qui mata pathsplit("`using'",`mpath'="",`mfile'="")
+
+                mata st_local("suffix",pathsuffix(`mfile'))
+                
+                if "`suffix'" == "" {
+                        mata `mfile'=`mfile'+".tex"      
+                }
+                else if "`suffix'" != ".tex" {
+                        mata `mfile' = subinstr(`mfile',"`suffix'",".tex")
+                }
+
                 mata st_local("using",`mfile')
                 mata st_local("cdir_new",`mpath')
 
                 local cdir_old "`c(dir)'"
                 qui cd "`cdir_new'"
         }
-		mata: `mataoutput' = m_convert_matrix(`anything',"`fmt'")
+	mata: `mataoutput' = m_convert_matrix(`anything',"`fmt'")
 
-		if "`coefficient'`coefficients'" != "" {
-			if "`coefficients'" == "coefficients" {
-				mata `mataoutput' = m_significance(`mataoutput',(0.1,0.05,0.01),999,1,1)
-			}
-			else {
-				mmat2tex_coefficient `mataoutput' , `coefficient'
-				mata `mataoutput'[(`r(ux)'..`r(lx)'),(`r(uy)'..`r(ly)')] = m_significance(`mataoutput'[(`r(ux)'..`r(lx)'),(`r(uy)'..`r(ly)')],(`r(levels)'),`r(dof)',`r(par)',`r(star)')
-			}
+	if "`coefficient'`coefficients'" != "" {
+	       if "`coefficients'" == "coefficients" {
+			mata `mataoutput' = m_significance(`mataoutput',(0.1,0.05,0.01),999,1,1)
 		}
+		else {
+			mmat2tex_coefficient `mataoutput' , `coefficient'
+			mata `mataoutput'[(`r(ux)'..`r(lx)'),(`r(uy)'..`r(ly)')] = m_significance(`mataoutput'[(`r(ux)'..`r(lx)'),(`r(uy)'..`r(ly)')],(`r(levels)'),`r(dof)',`r(par)',`r(star)')
+		}
+	}
 
-		//add columns
-		mata: `mataoutput' = m_add_cols(`mataoutput',"`coldelimiter'","`rowdelimiter'")
+	//add columns
+	mata: `mataoutput' = m_add_cols(`mataoutput',"`coldelimiter'","`rowdelimiter'")
 
         if `"`rownames'"' != "" {
                 mata: `rownamesmatrix' = strofreal(J(rows(`mataoutput'),2,0))
