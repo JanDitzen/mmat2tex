@@ -15,6 +15,7 @@ help for {hi:mmat2tex}
 		{cmd: substitute(}{it:string}{cmd:) insertendrow(}{it:string}{cmd:) coldelimiter(}{it:string}{cmd:) rowdelimiter(}{it:string}{cmd:)}
 		{cmdab:coeff:icient(}{it:options}{cmd:) show}	{cmd:]}
 		{cmd:sleep(real)}
+		{cmd:nocdset}
 
 {title:Description}
 
@@ -80,6 +81,8 @@ For example, significance stars are only added to b(2,1) and b(2,2), then the op
 This open is helpful if {cmd:mmat2tex} crashes with the error that a file handle 
 cannot be found. Default is 500 milli seconds.{p_end}
 
+{p 4 8}{cmd:nocdset} avoid changing working directory. Working directory is reset at end of program.{p_end}
+
 {title:Example}
 
 {p 4}{matacmd "test1 = (1,0.2,3\4,0.05,6)" : mata test1 = (1,0.2,3\4,0.05,6)} {p_end}
@@ -112,7 +115,7 @@ Set the significance levels as 5%, 1% and 0.1%{p_end}
 
 {title:Author}
 
-{p 4}Jan Ditzen (Heriot-Watt University){p_end}
+{p 4}Jan Ditzen (Free University of Bozen){p_end}
 {p 4}Email: {browse "mailto:jan.ditzen@unibz.it":jan.ditzen@unibz.it}{p_end}
 {p 4}Web: {browse "www.jan.ditzen.net":www.jan.ditzen.net}{p_end}
 {p 4 8}The substitution routine is gratefully taken from Benn Jan's {help estout} command. Thanks to Nick Cox for his suggestion to use local macros for the examples. 

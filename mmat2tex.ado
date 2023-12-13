@@ -17,7 +17,7 @@ capture program drop mmat2tex
 program define mmat2tex
         syntax anything using/ [, replace append fmt(string ) preheader(string)  colnames(string asis) postheader(string)  /*
                 */ bottom(string) rownames(string asis) substitute(string asis) insertendrow(string asis) coldelimiter(string) /*
-				*/ rowdelimiter(string) show  COEFFicient(string asis) COEFFicients sleep(real 500)]
+				*/ rowdelimiter(string) show  COEFFicient(string asis) COEFFicients sleep(real 500) NOCDSET ]
         tempname file mataoutput rownamesmatrix colnamesmatrix
 
         version 10
@@ -46,6 +46,15 @@ program define mmat2tex
                 local rowdelimiter "\\"
         }
 
+        if "`nocdset'" == "" {
+                tempname mfile mpath
+                qui mata pathsplit("`using'",`mpath'="",`mfile'="")
+                mata st_local("using",`mfile')
+                mata st_local("cdir_new",`mpath')
+
+                local cdir_old "`c(dir)'"
+                qui cd "`cdir_new'"
+        }
 		mata: `mataoutput' = m_convert_matrix(`anything',"`fmt'")
 
 		if "`coefficient'`coefficients'" != "" {
@@ -132,7 +141,8 @@ program define mmat2tex
                 tempfile tfile
                 capture file open `file' using `tfile' , w text
                 force_override `c(rc)' 1 , cmd(file open `file' using `tfile' , w text ) sleep(`sleep')
-                file open `file1' using `using' , r text
+                capture file open `file1' using `using' , r text
+				 force_override `c(rc)' 1 , cmd(file open `file1' using `using' , r text) sleep(`sleep')
                 file read `file1' temp
                 while r(eof)==0{
                         capture file write `file' `"`temp'"' _n
@@ -222,7 +232,10 @@ program define mmat2tex
                 }
                 file close `file'
         }
-        capture mata: mata drop `mataoutput' `rownamesmatrix' `colnamesmatrix'
+        capture mata: mata drop `mataoutput' `rownamesmatrix' `colnamesmatrix' `mfile' `mpath'
+        if "`nocdset'" == ""  {
+                qui cd "`cdir_old'"
+        }
 end
 
 **cell by cell transformation into strings
